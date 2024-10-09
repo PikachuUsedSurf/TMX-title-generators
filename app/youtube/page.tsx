@@ -12,15 +12,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { CheckIcon } from "lucide-react";
 
 export default function YoutubeTitleGenerator() {
-  const [location, setLocation] = useState("");
+  const [locations, setLocations] = useState([]);
   const [crop, setCrop] = useState("");
   const [date, setDate] = useState("");
   const [generatedTitle, setGeneratedTitle] = useState("");
 
-  const locations = [
+  const availableLocations = [
     "SINGIDA",
+    "MBEYA",
     "MANYARA",
     "SONGEA",
     "RUVUMA",
@@ -41,22 +43,33 @@ export default function YoutubeTitleGenerator() {
     "PIGEON PEA",
   ];
 
+  const handleLocationChange = (selectedLocation) => {
+    setLocations((prevLocations) => {
+      if (prevLocations.includes(selectedLocation)) {
+        return prevLocations.filter((loc) => loc !== selectedLocation);
+      } else {
+        return [...prevLocations, selectedLocation];
+      }
+    });
+  };
+
   const generateTitle = () => {
-    if (!location || !date) {
+    if (locations.length === 0 || !crop || !date) {
       alert("Please fill in all fields");
       return;
     }
 
-    const swahiliLocation = location.toLowerCase();
+    const formattedLocations = locations.join(", ");
+    const swahiliLocations = locations.join(", ");
     const formattedDate = new Date(date)
       .toLocaleDateString("en-GB", {
         day: "2-digit",
-        month: "long",
+        month: "numeric",
         year: "numeric",
       })
       .toUpperCase();
 
-    const title = `[LIVE] ${crop} TRADE SESSION ${location} (MNADA WA MBAAZI ${location} MBASHARA -TMX OTS | ${formattedDate})`;
+    const title = `[LIVE] ${crop} TRADE SESSION ${formattedLocations} (MNADA WA ${crop} ${swahiliLocations} MBASHARA-TMX OTS | ${formattedDate})`;
     setGeneratedTitle(title);
   };
 
@@ -67,15 +80,18 @@ export default function YoutubeTitleGenerator() {
       </h1>
       <div className="space-y-4">
         <div>
-          <Label htmlFor="location">Location</Label>
-          <Select onValueChange={setLocation}>
+          <Label htmlFor="location">Locations</Label>
+          <Select onValueChange={handleLocationChange} multiple>
             <SelectTrigger>
-              <SelectValue placeholder="Select location" />
+              <SelectValue placeholder="Select locations" />
             </SelectTrigger>
             <SelectContent>
-              {locations.map((loc) => (
+              {availableLocations.map((loc) => (
                 <SelectItem key={loc} value={loc}>
-                  {loc}
+                  <div className="flex items-center">
+                    <span className="mr-2">{loc}</span>
+                    {locations.includes(loc) && <CheckIcon size={16} />}
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
